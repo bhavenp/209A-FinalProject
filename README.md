@@ -1,2 +1,2 @@
 # 209A-FinalProject
-Repository for final project on Lending Club
+Repository for AC209a final project on Lending Club data
