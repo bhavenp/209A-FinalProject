@@ -1,6 +1,6 @@
-theme: jekyll-theme-tactile
-title: Lending Club
-description: Keeping Italian Olives Pure!
+theme: jekyll-theme-minimal
+title: Lending Club Project
+description: Lending Club Project
 baseurl:
 markdown: kramdown
 kramdown:
