@@ -1,4 +1,3 @@
-# testgpages
-Lending Club Project
+## Folder for Lending Club website pages
 
-Bhaven, Anthony, Hugo, Lipika
+This folder contains the Markdown files and styles used to create our website.
