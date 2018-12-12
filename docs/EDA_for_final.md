@@ -1,8 +1,5 @@
----
-title: EDA
-notebook: 4. Discrimination.ipynb
-nav_include: 3
----
+
+
 
 
 
@@ -46,6 +43,8 @@ There is a slight left shift in the distribution for loan amounts that were paid
 <hr>
 
 ## Plot distribution of interest rates for Paid and Defaulted loans
+
+
 
 
 
@@ -128,12 +127,15 @@ Default rate does not actually seem to vary with how long a borrower has been em
 
 
 
+
 For the most part, the default rates for loan purpose hover between 15-20%. The default rates for 'debt consolidation' and 'moving' are slightly higher, while the default rate for 'small business' is slightly over 30%. These loan purpose categories could be useful predictors of whether or not a borrower will default on his/her loan.
 <hr>
 
 ## Revol util distribution for paid/defaulted loans
 
 Let's see if 'revol_util' (the amount of credit the borrower is using relative to all available revolving credit) has any relationship with whether borrowers will default on their loans. We call this 'total credit utilization'. Individuals with higher credit utilization rate could be riskier individuals to lend to since they are already carrying a high debt.
+
+
 
 
 
@@ -172,6 +174,8 @@ Similar to 'interest rate' and 'total credit utilization', we see that the distr
 ## Home ownership status compared to default rate
 
 We would also like to see if there is any relationship between 'home owenership status' and defaulting on their loans. 'Home owenrship status' tells us whether a borrower owns, rents, or has a mortage for a home; there is also a 'ANY' category, but it is unclear what this exactly refers to.
+
+
 
 
 
