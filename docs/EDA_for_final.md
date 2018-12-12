@@ -1,4 +1,8 @@
-
+---
+title: EDA
+notebook: EDA_for_final.ipynb
+nav_include: 3
+---
 
 
 ```python
