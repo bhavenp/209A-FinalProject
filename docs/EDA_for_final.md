@@ -1,5 +1,8 @@
-
-
+---
+title: EDA
+notebook: 4. Discrimination.ipynb
+nav_include: 3
+---
 
 
 
