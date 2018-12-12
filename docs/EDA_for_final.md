@@ -1,46 +1,14 @@
 ---
-title: EDA on Accepted Loan Data
+title: EDA
 notebook: EDA_for_final.ipynb
 nav_include: 3
 ---
 
 
-```python
-import numpy as np
-import pandas as pd
-import datetime
-from sklearn import preprocessing
-pd.set_option('display.max_columns', 500)
-
-
-import matplotlib
-import matplotlib.pyplot as plt
-%matplotlib inline
-import seaborn as sns
-sns.set_style("white")
-```
-
-
-# Exploratory Data Analysis
-
-We began by looking at the accepted loan data from the years 2013 and 2014. We did not look at loan data prior to 2013 because Lending Club changed its underwriting policy in late 2012 (https://www.lendacademy.com/lending-club-underwriting-changes/), which "removed the highest risk borrowers that were previously being approved and... added back in the best borrowers from previously declined populations." Thus, we did not want the loan acceptance policies/strategies from 2012 and before to influence our models, since they are not representative of the way Lending Club accepts loans today.
+We began by looking at the accepted loan data from the years 2013 and 2014. We did not look at loan data prior to 2013 because Lending Club [changed its underwriting policy in late 2012](https://www.lendacademy.com/lending-club-underwriting-changes/), which "removed the highest risk borrowers that were previously being approved and... added back in the best borrowers from previously declined populations." Thus, we did not want the loan acceptance policies/strategies from 2012 and before to influence our models, since they are not representative of the way Lending Club accepts loans today.
 
 
 
-```python
-#read in 2013 and 2014 data
-data_2013 = pd.read_csv("../data/2012_13_loan_data/LoanStats3b.csv", delimiter=",", encoding='latin-1');
-
-data_2014_a = pd.read_csv("../data/2014_loan_data/LoanStats_2014_A.csv", delimiter=",");
-data_2014_b = pd.read_csv("../data/2014_loan_data/LoanStats_2014_B.csv", delimiter=",");
-data_2014_c = pd.read_csv("../data/2014_loan_data/LoanStats_2014_C.csv", delimiter=",");
-data_2014_d = pd.read_csv("../data/2014_loan_data/LoanStats_2014_D.csv", delimiter=",");
-data_2014_full = pd.concat([data_2014_a, data_2014_b, data_2014_c, data_2014_d]);
-
-print(data_2013.shape);
-print(data_2014_full.shape)
-
-```
 
 
     /Users/bhavenpatel/anaconda3/lib/python3.6/site-packages/IPython/core/interactiveshell.py:2785: DtypeWarning: Columns (47,123,124,125,128,129,130,133) have mixed types. Specify dtype option on import or set low_memory=False.
@@ -55,12 +23,6 @@ print(data_2014_full.shape)
 
 
 
-```python
-#see if both data sets have same columns
-print(len(data_2013.columns))
-print(len(data_2014_full.columns))
-assert(np.all(data_2013.columns == data_2014_full.columns));
-```
 
 
     145
@@ -69,16 +31,6 @@ assert(np.all(data_2013.columns == data_2014_full.columns));
 
 
 
-```python
-#concatenate 2013 and 2014 data
-train_data = pd.concat([data_2013, data_2014_full], axis = 0);
-train_data.reset_index();
-
-#add column for Default status. Default=1, Paid=0
-train_data['Default'] = 1;
-train_data.loc[train_data.loan_status == "Fully Paid", 'Default'] = 0;
-display(train_data.head());
-```
 
 
 
@@ -1003,22 +955,6 @@ display(train_data.head());
 
 
 
-```python
-fig = plt.figure(figsize=(10,6));
-ax = plt.subplot(1,1,1);
-fontsize= 16;
-
-ax.tick_params(labelsize=fontsize);
-ax.set_xlabel(xlabel="Funded Amount", fontsize=fontsize);
-ax.set_title(label="Funded amount distributions", fontsize=18)
-ax.grid(True, lw=1.75, ls='--', alpha=0.2)
-#plot the funded amount for loans that were paid back and those that defaulted
-sns.kdeplot(data = train_data.loc[train_data['Default'] == 0, "funded_amnt"], label = "Paid", ax = ax);
-sns.kdeplot(data = train_data.loc[train_data['Default'] == 1, "funded_amnt"], label = "Defaulted", ax = ax);
-ax.legend(fontsize=14);
-
-plt.show()
-```
 
 
 
@@ -1026,21 +962,12 @@ plt.show()
 
 
 There is a slight left shift in the distribution for loan amounts that were paid back, which could possibly be exploited for higher rates of return.
+<hr>
 
 ## Plot distribution of interest rates for Paid and Defaulted loans
 
 
 
-```python
-#convert interest rates to decimals
-
-def convert_ir(x):
-    rate = float(x[:-1]);
-    return rate/100;
-
-train_data.int_rate = train_data.int_rate.map(convert_ir);
-train_data.head()
-```
 
 
 
@@ -1966,12 +1893,6 @@ train_data.head()
 
 
 
-```python
-train_data_intRate_gb = train_data.groupby(by='Default').agg({
-    'int_rate':'mean'
-})
-train_data_intRate_gb
-```
 
 
 
@@ -2019,31 +1940,6 @@ train_data_intRate_gb
 
 
 
-```python
-fig = plt.figure(figsize=(16,4));
-ax = plt.subplot(1,1,1);
-f_size=16;
-
-ax.set_xlabel('Interest Rate', fontsize= f_size);
-# ax.set_ylabel('Density of Distribution', fontsize= f_size);
-ax.set_title('Interest rate distributions for loans', fontsize=18)
-ax.set_xlim(left=0.01, right=0.3);
-ax.set_ylim(bottom=0, top=12);
-ax.tick_params(labelsize=f_size);
-ax.grid(True, lw=1.75, ls='--', alpha=0.2)
-
-
-sns.kdeplot(train_data.loc[train_data['Default'] == 0, 'int_rate'], label='Paid', ax=ax);
-ax.vlines(x=train_data_intRate_gb.int_rate[0], ymin=0, ymax=12, colors='b', linestyles='dashed', label="Mean rate for \npaid loans")
-
-sns.kdeplot(train_data.loc[train_data['Default'] == 1, 'int_rate'], label='Default', ax=ax);
-ax.vlines(x=train_data_intRate_gb.int_rate[1], ymin=0, ymax=12, colors='orange', linestyles='dashed', label="Mean rate for \ndefaulted loans")
-
-ax.legend(loc='best', fontsize=f_size);
-
-# plt.show()
-# plt.savefig('Interest_rate_distrb_for_loans.png', bbox_inches='tight');
-```
 
 
 
@@ -2051,6 +1947,7 @@ ax.legend(loc='best', fontsize=f_size);
 
 
 Interest rate could also be a good predictor of defaulted loans since the distribution of interest rates for paid-back loans is slightly shifted to the left compared to the distribution of interest rates for defaulted loans. The means of the two distributions show some separation as well. We would expect that borrowers who are given a lower interest rate pay back their loans more often, most likely because it present less of a financial burden on them. 
+<hr>
 
 ## How does loan grade relate to default rate?
 
@@ -2058,14 +1955,6 @@ We can look at the default rate of loans with different grades (the grade of the
 
 
 
-```python
-train_data_grade_gb = train_data.groupby(by='grade').agg({
-    'int_rate': 'mean',
-    'Default': 'mean',
-    'funded_amnt': 'mean'
-});
-display(train_data_grade_gb)
-```
 
 
 
@@ -2148,32 +2037,6 @@ display(train_data_grade_gb)
 
 
 
-```python
-# font size
-f_size = 20
-x = np.arange(train_data_grade_gb.shape[0]); #get x locations for groups
-width = 0.3; #width of bars
-# make the figure
-fig = plt.figure(figsize = (15,8))
-ax = plt.subplot(1,1,1) # Create figure object
-ax.set_xmargin(0);
-
-ax.bar(x, train_data_grade_gb['Default'], width=width);
-ax.set_xticks(x); #set locations of tick marks
-# adjust size of labels on axes 
-ax.tick_params(labelsize = f_size);
-ax.grid(True, lw=1.75, ls='--', alpha=0.20); #include background grid #set axes titles
-ax.set_xlabel('Loan grade', fontsize=f_size);
-ax.set_ylabel('Default rate', fontsize=f_size);
-
-#make labels readable
-ax.set_xticklabels(train_data_grade_gb.index); #set x labels
-
-# set figure title label
-ax.set_title('Default rate by loan purpose', fontsize = 20);
-# ax.legend(loc='best', fontsize = f_size);
-plt.show();
-```
 
 
 
@@ -2181,6 +2044,7 @@ plt.show();
 
 
 As expected, we see that higher grade loans (A & B) have much lower rates of default than lower grade loans (E, F, G). Thus, loan grade should be a strong feature in predicting whether a future borrower will default on a loan.
+<hr>
 
 ## Plot distribution of employment years for Paid and Defaulted loans
 
@@ -2188,47 +2052,10 @@ We will investigate if the number of years employed has a relationship with whet
 
 
 
-```python
-def convert_empl_years(ey):
-    if ey == "10+ years":
-        return 10.0;
-    elif ey == "< 1 year":
-        return 0.0;
-    else:
-        return float(ey[0]);
-    
-#convert years employed
-train_data["years_emplyd"] = train_data["emp_length"].map(convert_empl_years, na_action='ignore');
-```
 
 
 
 
-```python
-fig = plt.figure(figsize=(16,4));
-ax = plt.subplot(1,1,1);
-f_size=16;
-
-ax.set_xlabel('Years rmployed', fontsize= f_size);
-# ax.set_ylabel('Density of Distribution', fontsize= f_size);
-ax.set_title('Years employed distributions for loans', fontsize=18)
-# ax.set_xlim(left=0.01, right=0.3);
-# ax.set_ylim(bottom=0, top=12);
-ax.tick_params(labelsize=f_size);
-ax.grid(True, lw=1.75, ls='--', alpha=0.2)
-
-
-sns.kdeplot(train_data.loc[train_data['Default'] == 0, 'years_emplyd'].dropna(), label='Paid', ax=ax);
-# ax.vlines(x=train_data_intRate_gb.int_rate[0], ymin=0, ymax=12, colors='b', linestyles='dashed', label="Mean rate for \npaid loans")
-
-sns.kdeplot(train_data.loc[train_data['Default'] == 1, 'years_emplyd'].dropna(), label='Default', ax=ax);
-# ax.vlines(x=train_data_intRate_gb.int_rate[1], ymin=0, ymax=12, colors='orange', linestyles='dashed', label="Mean rate for \ndefaulted loans")
-
-ax.legend(loc='best', fontsize=f_size);
-
-# plt.show()
-# plt.savefig('Interest_rate_distrb_for_loans.png', bbox_inches='tight');
-```
 
 
 
@@ -2241,14 +2068,6 @@ Let's see if the rate of default really differs for borrowers with 10+ years of 
 
 
 
-```python
-train_data_years_employed_gb = train_data.groupby(by="emp_length").agg({
-    'int_rate': 'mean',
-    'Default': 'mean'
-})
-train_data_years_employed_gb.columns = ['Mean Interest Rate', 'Default Rate']
-display(train_data_years_employed_gb)
-```
 
 
 
@@ -2341,20 +2160,12 @@ display(train_data_years_employed_gb)
 
 
 Default rate does not actually seem to vary with how long a borrower has been employed. It is possible that combined with other features that employment length could be a predictive of default.
+<hr>
 
 ## Does default rate or interest rate vary with purpose of the loan
 
 
 
-```python
-#group data by different purposes for loan. Calculate mean interest rate and default rate of these loans
-train_data_purpose_gb = train_data.groupby(by="purpose").agg({
-    'int_rate': 'mean',
-    'Default': 'mean'
-})
-train_data_purpose_gb.columns = ['Mean Interest Rate', 'Default Rate']
-display(train_data_purpose_gb)
-```
 
 
 
@@ -2458,33 +2269,6 @@ display(train_data_purpose_gb)
 
 
 
-```python
-# font size
-f_size = 20
-x = np.arange(train_data_purpose_gb.shape[0]); #get x locations for groups
-width = 0.3; #width of bars
-# make the figure
-fig = plt.figure(figsize = (27,8))
-ax = plt.subplot(1,1,1) # Create figure object
-ax.set_xmargin(0);
-
-ax.bar(x, train_data_purpose_gb['Default Rate'], width=width);
-ax.set_xticks(x); #set locations of tick marks
-# adjust size of labels on axes 
-ax.tick_params(labelsize = f_size);
-ax.grid(True, lw=1.75, ls='--', alpha=0.20); #include background grid #set axes titles
-ax.set_xlabel('Purpose for loan', fontsize=f_size);
-ax.set_ylabel('Default rate', fontsize=f_size);
-
-#make labels readable
-x_labels = ['car', 'credit card', 'debt\nconsolidation', 'home\nimprovement', 'house', 'major\npurchase', 'medical', 'moving', 'other', 'renewable\nenergy', 'small\nbusiness', 'vacation', 'wedding'];
-ax.set_xticklabels(x_labels); #set x labels
-
-# set figure title label
-ax.set_title('Default rate by loan purpose', fontsize = 20);
-# ax.legend(loc='best', fontsize = f_size);
-plt.show();
-```
 
 
 
@@ -2492,6 +2276,7 @@ plt.show();
 
 
 For the most part, the default rates for loan purpose hover between 15-20%. The default rates for 'debt consolidation' and 'moving' are slightly higher, while the default rate for 'small business' is slightly over 30%. These loan purpose categories could be useful predictors of whether or not a borrower will default on his/her loan.
+<hr>
 
 ## Revol util distribution for paid/defaulted loans
 
@@ -2499,15 +2284,6 @@ Let's see if 'revol_util' (the amount of credit the borrower is using relative t
 
 
 
-```python
-def convert_revol_util(x):
-    num =  x[:-1]
-    return float(num) / 100;
-
-#convert the revol util to a float
-train_data['revol_util_prcnt'] = train_data['revol_util'].map(convert_revol_util, na_action='ignore');
-train_data.head()
-```
 
 
 
@@ -3445,9 +3221,6 @@ train_data.head()
 
 
 
-```python
-train_data.loc[train_data['revol_util_prcnt'] == 8.923, : ]
-```
 
 
 
@@ -3781,31 +3554,6 @@ train_data.loc[train_data['revol_util_prcnt'] == 8.923, : ]
 
 
 
-```python
-fig = plt.figure(figsize=(16,4));
-ax = plt.subplot(1,1,1);
-f_size=16;
-
-ax.set_xlabel('Total credit utilization', fontsize= f_size);
-# ax.set_ylabel('Density of Distribution', fontsize= f_size);
-ax.set_title('Distributions of total credit utilization for loans', fontsize=18)
-ax.set_xlim(left=-0.1, right=1.1);
-# ax.set_ylim(bottom=0, top=12);
-ax.tick_params(labelsize=f_size);
-ax.grid(True, lw=1.75, ls='--', alpha=0.2)
-
-
-sns.kdeplot(train_data.loc[train_data['Default'] == 0, 'revol_util_prcnt'].dropna(), label='Paid', ax=ax);
-# ax.vlines(x=train_data_intRate_gb.int_rate[0], ymin=0, ymax=12, colors='b', linestyles='dashed', label="Mean rate for \npaid loans")
-
-sns.kdeplot(train_data.loc[train_data['Default'] == 1, 'revol_util_prcnt'].dropna(), label='Default', ax=ax);
-# ax.vlines(x=train_data_intRate_gb.int_rate[1], ymin=0, ymax=12, colors='orange', linestyles='dashed', label="Mean rate for \ndefaulted loans")
-
-ax.legend(loc='best', fontsize=f_size);
-
-# plt.show()
-# plt.savefig('Interest_rate_distrb_for_loans.png', bbox_inches='tight');
-```
 
 
 
@@ -3813,6 +3561,7 @@ ax.legend(loc='best', fontsize=f_size);
 
 
 The distributions of 'percentage of total credit used' for borrowers that paid back their loans versus borrowers that defaulted overlap quite a bit. The distribution for borrowers than paid back their loans is a bit left shifted, but it is unclear if percentage of total credit is a good predictor.
+<hr>
 
 ## DTI distribution for paid/defaulted loans
 
@@ -3820,30 +3569,6 @@ Let's see if 'dti' (a ratio calculated using the borrower’s total monthly debt
 
 
 
-```python
-fig = plt.figure(figsize=(16,4));
-ax = plt.subplot(1,1,1);
-f_size=16;
-
-ax.set_xlabel('Debt to income ratio', fontsize= f_size);
-ax.set_title('Distributions of debt to income ratio for loans', fontsize=18)
-# ax.set_xlim(left=-0.1, right=1.1);
-# ax.set_ylim(bottom=0, top=12);
-ax.tick_params(labelsize=f_size);
-ax.grid(True, lw=1.75, ls='--', alpha=0.2)
-
-
-sns.kdeplot(train_data.loc[train_data['Default'] == 0, 'dti'].dropna(), label='Paid', ax=ax);
-# ax.vlines(x=train_data_intRate_gb.int_rate[0], ymin=0, ymax=12, colors='b', linestyles='dashed', label="Mean rate for \npaid loans")
-
-sns.kdeplot(train_data.loc[train_data['Default'] == 1, 'dti'].dropna(), label='Default', ax=ax);
-# ax.vlines(x=train_data_intRate_gb.int_rate[1], ymin=0, ymax=12, colors='orange', linestyles='dashed', label="Mean rate for \ndefaulted loans")
-
-ax.legend(loc='best', fontsize=f_size);
-
-# plt.show()
-# plt.savefig('Interest_rate_distrb_for_loans.png', bbox_inches='tight');
-```
 
 
 
@@ -3851,6 +3576,7 @@ ax.legend(loc='best', fontsize=f_size);
 
 
 Similar to 'interest rate' and 'total credit utilization', we see that the distribution of 'dti' for borrowers that paid back their loans is shifted to the left slightly when compared to the distribution of 'dti' for borrowers that defaulted. This predictor could also be useful in identifying future borrowers that will default on their loans.
+<hr>
 
 ## Home ownership status compared to default rate
 
@@ -3858,9 +3584,6 @@ We would also like to see if there is any relationship between 'home owenership 
 
 
 
-```python
-train_data.home_ownership.unique()
-```
 
 
 
@@ -3872,16 +3595,6 @@ train_data.home_ownership.unique()
 
 
 
-```python
-train_data_home_gb = train_data.groupby(by='home_ownership').agg({
-    'home_ownership': 'count',
-    'Default': 'mean',
-    'int_rate': 'mean'
-})
-
-train_data_home_gb.columns = ['Count', 'Default Rate', 'Average Interest Rate']
-display(train_data_home_gb)
-```
 
 
 
@@ -3946,9 +3659,6 @@ display(train_data_home_gb)
 
 
 
-```python
-train_data_home_gb['Default Rate'][1:4]
-```
 
 
 
@@ -3964,33 +3674,6 @@ train_data_home_gb['Default Rate'][1:4]
 
 
 
-```python
-# font size
-f_size = 20
-x = np.arange(train_data_home_gb.shape[0]-1); #get x locations for groups
-width = 0.3; #width of bars
-# make the figure
-fig = plt.figure(figsize = (8,6))
-ax = plt.subplot(1,1,1) # Create figure object
-# ax.set_xmargin(0);
-
-ax.bar(x, train_data_home_gb['Default Rate'][1:4], width=width);
-ax.set_xticks(x); #set locations of tick marks
-# adjust size of labels on axes 
-ax.tick_params(labelsize = f_size);
-ax.grid(True, lw=1.75, ls='--', alpha=0.60); #include background grid #set axes titles
-ax.set_xlabel('Home ownership status', fontsize=f_size);
-ax.set_ylabel('Default rate', fontsize=f_size);
-
-#make labels readable
-x_labels = ['Mortgage', 'Own', 'Rent'];
-ax.set_xticklabels(x_labels); #set x labels
-
-# set figure title label
-ax.set_title('Default rate by home ownership status', fontsize = 20);
-# ax.legend(loc='best', fontsize = f_size);
-plt.show();
-```
 
 
 
