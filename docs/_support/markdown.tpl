@@ -18,11 +18,6 @@
 {% endif %}
 {% endblock input %}
 
-{% block input %}
-{% if cell.metadata.hide_all == True %}
-{% endif %}
-{% endblock input %}
-
 {% block error %}
 {{ super() }}
 {% endblock error %}
