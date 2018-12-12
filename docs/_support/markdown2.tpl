@@ -18,10 +18,10 @@
 {% endif %}
 {% endblock input %}
 
-{% block input %}
-{% if cell.metadata.hide_all == True %}
+{% block output %}
+{% if cell.metadata.hide_output == True %}
 {% endif %}
-{% endblock input %}
+{% endblock output %}
 
 {% block error %}
 {{ super() }}
