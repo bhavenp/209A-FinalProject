@@ -1,5 +1,5 @@
 ---
-title: EDA
+title: 2. EDA
 notebook: EDA_for_final.ipynb
 nav_include: 2
 ---
