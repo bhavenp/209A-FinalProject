@@ -20,6 +20,8 @@
 
 {% block output %}
 {% if cell.metadata.hide_output == True %}
+{% else %}
+{{ super() }}
 {% endif %}
 {% endblock output %}
 
